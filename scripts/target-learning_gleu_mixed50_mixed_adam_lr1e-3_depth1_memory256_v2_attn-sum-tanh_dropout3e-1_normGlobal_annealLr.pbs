@@ -1,0 +1,39 @@
+#$ -l mem_req=10G
+#$ -S /bin/bash
+#$ -l h_vmem=80G
+#$ -e /sequoia/data2/aosokin/projects/seq2seq-pytorch/cluster/iwlst14/runs_20171004/logs/target-learning_gleu_mixed50_mixed_adam_lr1e-3_depth1_memory256_v2_attn-sum-tanh_dropout3e-1_normGlobal_annealLr.e
+#$ -o /sequoia/data2/aosokin/projects/seq2seq-pytorch/cluster/iwlst14/runs_20171004/logs/target-learning_gleu_mixed50_mixed_adam_lr1e-3_depth1_memory256_v2_attn-sum-tanh_dropout3e-1_normGlobal_annealLr.o
+#$ -q gaia.q,titan.q
+#$ -N searnn-pytorch
+
+export PATH=/home/aosokin/local/software/anaconda3/envs/pytorch/bin:/home/aosokin/local/software/anaconda3/bin:/usr/local/cuda-8.0/bin/:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/opt/dell/srvadmin/bin:/home/aosokin/bin
+
+export LD_LIBRARY_PATH=/home/aosokin/local/software/cudnn/cudnn-8.0-linux-x64-v6.0/lib64/:/usr/local/cuda-8.0/lib64/:/usr/local/cuda-8.0/extras/CUPTI/lib64/:$LD_LIBRARY_PATH
+
+# prevent pytorch form eating all the cores
+export EXP_NUM_CPU_THREADS=4
+export OMP_NUM_THREADS=${EXP_NUM_CPU_THREADS}  
+export MKL_NUM_THREADS=${EXP_NUM_CPU_THREADS}
+export NUMEXPR_NUM_THREADS=${EXP_NUM_CPU_THREADS}
+
+if [ "$QUEUE" = "gaia.q" ]
+then
+    source activate pytorch-gaia
+else
+    source activate pytorch-titan
+fi
+
+export ROOT_PATH=/sequoia/data2/aosokin/projects/seq2seq-pytorch
+
+cd ${ROOT_PATH}
+
+env
+
+export EXP_PATH=${ROOT_PATH}/results/iwlst14/runs_20171004/target-learning_gleu_mixed50_mixed_adam_lr1e-3_depth1_memory256_v2_attn-sum-tanh_dropout3e-1_normGlobal_annealLr
+
+mkdir -p ${EXP_PATH}
+
+ls -al
+
+python main-seq2seq.py --dataset nmt --dataroot data/iwlst14_de-en/iwlst14_de-en_train_dev.train.pt --rollin mixed --rollin_ref_prob 0.5 --rollout mixed --objective target-learning --loss gleu --reference_policy gleu-best-suffix --obj_normalization cell-global --revert_input_sequence --memory_size 256 --memory_size_encoder 256 --rnn_depth 1 --bidirectional --attention --attn_type sum-tanh --dropout 0.3 --input_feed 0 --num_cells_to_rollout 20 --sample_labels_uniform 0 --sample_labels_policy_topk 15 --sample_labels_neighbors 5  --optim_method adam --learning_rate 1e-3 --anneal_learning_rate --lr_quantity_to_monitor dataset_specific_val --lr_quantity_mode max --lr_quantity_epsilon 1e-4 --lr_reduce_factor 0.5 --lr_min_value 1e-5  --lr_patience 5000 --lr_cooldown 10000 --lr_quantity_smoothness 1000 --max_iter 100000 --print_iter 1 --eval_iter 100 --save_iter 50000 --eval_size 1500  --rollout_batch_size 256 --log_path ${EXP_PATH} > ${EXP_PATH}/stdout.log
+
