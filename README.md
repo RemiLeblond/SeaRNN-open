@@ -39,7 +39,7 @@ python setup.py build_ext --inplace
 Finally, download the data at http://www.di.ens.fr/sierra/research/SEARNN/ and preprocess it:
 
 ```bash
-scripts/prepare_iwlst14.de-en.sh
+scripts/prepare_iwlst14_de-en.sh
 ```
 
 ## Running
