@@ -2,7 +2,7 @@ import os
 import nltk
 
 import torch
-from datasets.dataset_seq2seq import DatasetSeq2seq
+from .dataset_seq2seq import DatasetSeq2seq
 from losses_utils import compute_prediction_lengths
 from models import EmbeddingSeq2seq
 

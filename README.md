@@ -17,6 +17,7 @@ You can replace the version numbers in the following commands to suit your archi
 
 ```bash
 virtualenv -p /usr/bin/python3.5 --system-site-packages /path/to/virtualenv
+source /path/to/virtualenv/bin/activate
 pip3 install http://download.pytorch.org/whl/cu80/torch-0.3.0.post4-cp35-cp35m-linux_x86_64.whl
 pip3 install torchvision
 pip3 install numpy --upgrade
@@ -30,7 +31,7 @@ git clone git@github.com:RemiLeblond/SeaRNN-open.git
 cd SeaRNN-open
 ```
 
-Next, compile the cython files
+Next, compile the cython files. This will probably send a few warnings which you can ignore.
 
 ```bash
 python setup.py build_ext --inplace
@@ -39,7 +40,8 @@ python setup.py build_ext --inplace
 Finally, download the data at http://www.di.ens.fr/sierra/research/SEARNN/ and preprocess it:
 
 ```bash
-scripts/prepare_iwlst14.de-en.sh
+export DATA_ROOT=/path/to/data
+scripts/prepare_iwlst14_de-en.sh
 ```
 
 ## Running
@@ -47,12 +49,12 @@ scripts/prepare_iwlst14.de-en.sh
 ### Step 1: Train the model
 OCR
 ```bash
-python main_seq2seq.py --dataset ocr --dataroot /path/to/OCR --rollin learned --rollout mixed --objective target-learning --log_path /path/to/save
+python main_seq2seq.py --dataset ocr --dataroot ${DATA_ROOT} --rollin learned --rollout mixed --objective target-learning --log_path /path/to/save
 ```
 
 NMT (the standard MLE training)
 ```bash
-python main_seq2seq.py --dataset nmt --dataroot /path/to/iwlst14_de-en_train_dev.train.pt --rollin gt --objective mle --log_path /path/to/save
+python main_seq2seq.py --dataset nmt --dataroot ${DATA_ROOT}/iwlst14_de-en_train_dev.train.pt --rollin gt --objective mle --log_path /path/to/save
 ```
 
 Various parameters can be tuned, including the rollin and rollout policies, the objective etc.
@@ -61,7 +63,7 @@ See main_seq2seq.py for a complete description.
 ### Step 2: Evaluate.
 
 ```bash
-python main_seq2seq.py --dataset nmt --dataroot /path/to/iwlst14_de-en_train_test.train.pt --max_iter 0 --print_iter 1 --checkpoint_file /path/to/checkpoint_file.pth
+python main_seq2seq.py --dataset nmt --dataroot /${DATA_ROOT}/iwlst14_de-en_train_test.train.pt --max_iter 0 --print_iter 1 --checkpoint_file /path/to/checkpoint_file.pth
 ```
 The arguments must be coherent with those used for training the model (such as the size of the hidden state of the RNN, whether the encoder is bidirectional or not...), otherwise the model loading will break.
 

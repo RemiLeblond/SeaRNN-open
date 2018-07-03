@@ -2,7 +2,7 @@ import argparse
 
 import torch
 
-from datasets.dict import Dict
+from .dict import Dict
 
 parser = argparse.ArgumentParser(description='preprocess.py')
 
